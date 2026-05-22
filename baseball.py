@@ -5,15 +5,12 @@ import time
 # ─────────────────────────────────────────
 # 설정
 # ─────────────────────────────────────────
-SHEET_ID = "1HyOhf-WC6mTf9QKjX1LgLsklFM02-GWIYewBu_R8J6M"
-CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=1944623840"
-SHEET_ID = "1HyOhf-WC6mTf9QKjX1LgLsklFM02-GWIYewBu_R8J6M"
-CSV_URL        = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=1944623840"  # 응답 시트
-MISSION_URL    = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=0"           # 시트1 (미션용)
+SHEET_ID = "1bUFOQ_jFow756O9-4eNfTVveNa34PflniA2dclqcrdA"  # 새 관제탑 DB
+CSV_URL     = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=1944623840"  # 응답 시트
+MISSION_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=0"           # 시트1 (미션용)
 
-SCORE_COL = "최종점수"   # M열 헤더명 (실제 시트 헤더와 맞춰주세요)
-NAME_COL  = "1. 본인의 이름을 입력해주세요."       # 이름 열 헤더명 (실제 시트 헤더와 맞춰주세요)
-MISSION_COL_IDX = 13     # N열 = 0-based index 13
+SCORE_COL = "최종점수"                          # 점수 열 헤더명 (실제 시트 헤더와 맞춰주세요)
+NAME_COL  = "1. 본인의 이름을 입력해주세요."    # 이름 열 헤더명 (실제 시트 헤더와 맞춰주세요)
 
 # ─────────────────────────────────────────
 # 데이터 로드
@@ -27,20 +24,16 @@ def load_data():
     except Exception as e:
         return None, None, f"시트 연결 오류: {e}"
 
-    # 2행(index 0) = 정답칸 → 분리
-    answer_row = df.iloc[0]
-
-    # N2 셀 = 현재 미션 안내 (answer_row의 N열)
-    # 기존 mission_text 읽는 코드 전체를 아래로 교체
+    # 미션 텍스트 = 시트1(gid=0)의 A1 셀
     try:
         df_mission = pd.read_csv(MISSION_URL, header=None)
         mission_text = str(df_mission.iloc[0, 0]).strip()
         if not mission_text or mission_text == "nan":
             mission_text = "현재 진행 중인 미션이 없습니다"
     except Exception:
-         mission_text = "현재 진행 중인 미션이 없습니다"
+        mission_text = "현재 진행 중인 미션이 없습니다"
 
-    # 3행~(index 1~) = 참가자 데이터
+    # 3행~(index 1~) = 참가자 데이터 (2행/index 0 = 정답칸 → 제외)
     participants = df.iloc[1:].copy()
     participants = participants.dropna(subset=[NAME_COL])  # 이름 없는 행 제거
 
